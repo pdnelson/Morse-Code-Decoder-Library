@@ -62,22 +62,22 @@ class MorseCodeDecoder {
         bool monitorUserInput(bool sensorStatus, long currMillis);
 
         // Tell the library that you've read the message, so that it can set the newMessageReady field to false.
-		void acknowledgeMessage();
-		
-		// Returns the final decoded message that contains a null terminator at the end.
-		char* getDecodedMessage();
-		
-		// Returns the size of the most-recently-decoded message. This size does NOT include the null terminator.
-		uint16_t getDecodedMessageSize();
-		
-		uint16_t getUserInputSize();
+        void acknowledgeMessage();
+
+        // Returns the final decoded message that contains a null terminator at the end.
+        char* getDecodedMessage();
+
+        // Returns the size of the most-recently-decoded message. This size does NOT include the null terminator.
+        uint16_t getDecodedMessageSize();
+
+        uint16_t getUserInputSize();
 
     private:
         void decodeMessage();
         bool messageDecoded;
         bool newMessageReady; // Turns true after a message is decoded, and turns false as soon as getLatestMessage is called.
-		uint16_t decodedMessageMax;
-		char* decodedMessage;
+        uint16_t decodedMessageMax;
+        char* decodedMessage;
         uint16_t newMessageIndex; // The index used so the program knows where to insert decoded characters into the userInput array.
         uint16_t timeUnitUpperLimitMs; // Read above description (setTimeUnitUpperLimitMs)
         uint8_t debounceIntervalMs; // Read above description (setDebounceIntervalMs)

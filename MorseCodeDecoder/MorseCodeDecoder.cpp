@@ -11,7 +11,7 @@ MorseCodeDecoder::MorseCodeDecoder(uint16_t userInputMax, uint16_t decodedMessag
     /* Set default values for all other fields */
     this->newMessageIndex = 0; // in bytes
     this->messageDecoded = true;
-	this->decodedMessageMax = decodedMessageMax;
+    this->decodedMessageMax = decodedMessageMax;
     this->userInputCounter = 0;
     this->lastUserInputMs = __LONG_MAX__;
     this->keyHoldCounterMs = 0;
@@ -19,12 +19,12 @@ MorseCodeDecoder::MorseCodeDecoder(uint16_t userInputMax, uint16_t decodedMessag
     this->lowestInputHoldMs = UINT16_MAX;
     this->highestInputHoldMs = 0;
     this->lowestInputReleaseMs = UINT16_MAX;
-	this->userInputMax = userInputMax;
+    this->userInputMax = userInputMax;
 
     // We are safe to use malloc here because this constructor should only be called at the beginning of
     // the program.
     this->userInput = (uint16_t*)malloc(userInputMax * sizeof(uint16_t));
-	this->decodedMessage = (char*)malloc(decodedMessageMax * sizeof(char));
+    this->decodedMessage = (char*)malloc(decodedMessageMax * sizeof(char));
 }
 
 void MorseCodeDecoder::setTimeUnitUpperLimitMs(uint16_t timeUnitUpperLimitMs) {
@@ -40,27 +40,27 @@ void MorseCodeDecoder::setFinishedTypingMs(uint16_t finishedTypingMs) {
 }
 
 void MorseCodeDecoder::acknowledgeMessage() {
-	this->userInputCounter = 0;
-	this->newMessageReady = false;
+    this->userInputCounter = 0;
+    this->newMessageReady = false;
 }
 
 char* MorseCodeDecoder::getDecodedMessage() {
-	return this->decodedMessage;
+    return this->decodedMessage;
 }
 
 uint16_t MorseCodeDecoder::getDecodedMessageSize() {
-	return this->newMessageIndex;
+    return this->newMessageIndex;
 }
 
 uint16_t MorseCodeDecoder::getUserInputSize() {
-	return this->userInputCounter;
+    return this->userInputCounter;
 }
 
 bool MorseCodeDecoder::monitorUserInput(bool sensorStatus, long currMillis) {
 
     // Only monitor user input if 1ms has elapsed
     if(currMillis != lastMillis) {
-		bool currentlyTyping = currMillis - this->lastUserInputMs <= this->finishedTypingMs;
+        bool currentlyTyping = currMillis - this->lastUserInputMs <= this->finishedTypingMs;
 
         // Count the number of milliseconds that the user held the telegraph key
         if(sensorStatus) {
@@ -99,12 +99,12 @@ bool MorseCodeDecoder::monitorUserInput(bool sensorStatus, long currMillis) {
         }
         else if(!this->messageDecoded) {
             // The user finished typing and we can decode the message
-			this->decodeMessage();
-			this->newMessageReady = true;
+            this->decodeMessage();
+            this->newMessageReady = true;
 
             // Reset everything back to being blank
             this->keyReleaseCounterMs = 0;
-			this->keyHoldCounterMs = 0;
+            this->keyHoldCounterMs = 0;
             this->messageDecoded = true;
             this->lowestInputHoldMs = UINT16_MAX;
             this->highestInputHoldMs = 0;
@@ -184,14 +184,14 @@ void MorseCodeDecoder::decodeMessage() {
 
         charBuilderIndex--;
     }
-	
-	// If we are NOT all the way at the end of the array, then we can safely append the null terminator.
-	if(this->newMessageIndex < this->decodedMessageMax)
-		this->decodedMessage[this->newMessageIndex] = '\0';
-	
-	// Otherwise, we need to overwrite the last character.
-	else {
-		this->decodedMessage[this->newMessageIndex - 1] = '\0';
-		this->newMessageIndex--;
-	}
+
+    // If we are NOT all the way at the end of the array, then we can safely append the null terminator.
+    if(this->newMessageIndex < this->decodedMessageMax)
+        this->decodedMessage[this->newMessageIndex] = '\0';
+
+    // Otherwise, we need to overwrite the last character.
+    else {
+        this->decodedMessage[this->newMessageIndex - 1] = '\0';
+        this->newMessageIndex--;
+    }
 }
