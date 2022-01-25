@@ -33,6 +33,8 @@
 class MorseCodeDecoder {
     public:
         // Constructor that takes the MAXIMUM user input allowed, which corresponds to the maximum number of combined key presses and releases.
+        // The decoded message max is the maximum number of characters that the decoded message is allowed to be. This INCLUDES the null terminator at the
+        // end of the string.
         MorseCodeDecoder(uint16_t userInputMax, uint16_t decodedMessageMax);
 
         // "Time Units" in morse code don't have a particular number of milliseconds attached to them, but there exists an edge case where the message
@@ -62,6 +64,7 @@ class MorseCodeDecoder {
         bool monitorUserInput(bool sensorStatus, long currMillis);
 
         // Tell the library that you've read the message, so that it can set the newMessageReady field to false.
+        // This will also reset other fields that are used by the decoder, and is necessary to call when you are ready to read in a new message.
         void acknowledgeMessage();
 
         // Returns the final decoded message that contains a null terminator at the end.
@@ -70,19 +73,20 @@ class MorseCodeDecoder {
         // Returns the size of the most-recently-decoded message. This size does NOT include the null terminator.
         uint16_t getDecodedMessageSize();
 
+        // Return the number of times that the user pressed (and then released) the telegraph key.
         uint16_t getUserInputSize();
 
     private:
         void decodeMessage();
         bool messageDecoded;
         bool newMessageReady; // Turns true after a message is decoded, and turns false as soon as getLatestMessage is called.
-        uint16_t decodedMessageMax;
-        char* decodedMessage;
+        char* decodedMessage; // Read above description (getDecodedMessage)
         uint16_t newMessageIndex; // The index used so the program knows where to insert decoded characters into the userInput array.
         uint16_t timeUnitUpperLimitMs; // Read above description (setTimeUnitUpperLimitMs)
         uint8_t debounceIntervalMs; // Read above description (setDebounceIntervalMs)
         uint16_t finishedTypingMs; // Read above description (setFinishedTypingMs)
         uint16_t userInputMax; // Read above description (constructor)
+        uint16_t decodedMessageMax; // Read above description (constructor)
 
         // The user input is being stored as an array of telegraph key presses. After the input is finished, THEN everything is parsed and printed.
         // Every EVEN index contains the amount of time the key was held down.
