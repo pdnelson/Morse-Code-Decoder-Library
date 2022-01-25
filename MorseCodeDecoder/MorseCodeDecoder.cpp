@@ -20,6 +20,7 @@ MorseCodeDecoder::MorseCodeDecoder(uint16_t userInputMax, uint16_t decodedMessag
     this->highestInputHoldMs = 0;
     this->lowestInputReleaseMs = UINT16_MAX;
     this->userInputMax = userInputMax;
+    this->listening = false;
 
     // We are safe to use malloc here because this constructor should only be called at the beginning of
     // the program.
@@ -56,16 +57,19 @@ uint16_t MorseCodeDecoder::getUserInputSize() {
     return this->userInputCounter;
 }
 
+bool MorseCodeDecoder::getListeningStatus() {
+    return this->listening;
+}
+
 bool MorseCodeDecoder::monitorUserInput(bool sensorStatus, long currMillis) {
 
     // Only monitor user input if 1ms has elapsed
     if(currMillis != lastMillis) {
-        bool currentlyTyping = currMillis - this->lastUserInputMs <= this->finishedTypingMs;
+        bool currentlyTyping = currMillis - this->lastUserInputMs < this->finishedTypingMs ;
 
         // Count the number of milliseconds that the user held the telegraph key
-        if(sensorStatus) {
+        if(sensorStatus && this->keyHoldCounterMs < this->finishedTypingMs) {
             this->lastUserInputMs = currMillis;
-            this->messageDecoded = false; // If the user is typing, then the message has not been decoded yet
 
             // keyReleaseCounterMs being 0 indicates we are starting a new message, or it has already been added to the array.
             // Items will ONLY continue to be added to the array if there is space
@@ -80,8 +84,9 @@ bool MorseCodeDecoder::monitorUserInput(bool sensorStatus, long currMillis) {
 
             this->keyHoldCounterMs++;
         }
+
         // Count the number of milliseconds that the user released the telegraph key
-        else if (currentlyTyping) {
+        else if (currentlyTyping && this->keyHoldCounterMs < this->finishedTypingMs) {
 
             // keyHoldCounterMs being 0 indicates the last key hold value was already added to the array
             // Items will ONLY continue to be added to the array if there is space
@@ -93,10 +98,44 @@ bool MorseCodeDecoder::monitorUserInput(bool sensorStatus, long currMillis) {
 
                 this->userInputCounter++;
                 this->keyHoldCounterMs = 0;
+                
+                this->messageDecoded = false; // An item was just added to the array, so the message has NOT been decoded yet.
             }
 
             this->keyReleaseCounterMs++;
         }
+
+        // If the user holds the key for the duration of finished typing, then we enter listening mode
+        else if(sensorStatus && this->keyHoldCounterMs >= this->finishedTypingMs) {
+            // Check if there is any user input we should decode first before listening
+            if(this->userInputCounter > 0) {
+                this->userInputCounter--; // Subtract one because the counter currently will contain the last release, which we don't want
+
+                this->decodeMessage();
+                this->newMessageReady = true;
+                this->messageDecoded = true;
+
+                // Only clear the release fields because we still depend on the hold fields to reach this else if block
+                this->lowestInputReleaseMs = UINT16_MAX;
+                this->keyReleaseCounterMs = 0;
+            }
+
+            this->listening = true;
+        }
+
+        // If we are in listening mode and the user releases the key, then exit listening mode and clear fields
+        else if(!sensorStatus && this->listening) {
+            this->listening = false;
+
+            // Clear the remaining fields that were not cleared when entering listening mode
+            this->keyHoldCounterMs = 0;
+            this->lowestInputHoldMs = UINT16_MAX;
+            this->highestInputHoldMs = 0;
+
+            // Must reset this so that the program doesn't think the user released the key intending to provide input
+            this->lastUserInputMs = __LONG_MAX__;
+        }
+
         else if(!this->messageDecoded) {
             // The user finished typing and we can decode the message
             this->decodeMessage();

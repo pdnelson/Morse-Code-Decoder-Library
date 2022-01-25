@@ -76,23 +76,35 @@ class MorseCodeDecoder {
         // Return the number of times that the user pressed (and then released) the telegraph key.
         uint16_t getUserInputSize();
 
+        // Returns whether we are in "listening" mode or not.
+        // In telegraphy, both telegraph keys are connected in series with each other, meaning both of them would need to be shorted in order for
+        // a "beep" to be produced. To do this, one side would close the circuit by moving the circuit closer to the center, and the other side
+        // would OPEN their circuit closer by moving it to the right (or left). This would allow the side with the open circuit to short the connection
+        // to the morse code intervals using the knob.
+        //
+        // For this value, we are checking that the circuit has been closed for the duration set by "setFinishedTypingMs."
+        bool getListeningStatus();
+
+
     private:
         void decodeMessage();
-        bool messageDecoded;
-        bool newMessageReady; // Turns true after a message is decoded, and turns false as soon as getLatestMessage is called.
         char* decodedMessage; // Read above description (getDecodedMessage)
+        bool messageDecoded; // Tell us whether the user is currently typing a new message, or if there are no messages to be decoded (and none in the works)
+        uint16_t decodedMessageMax; // Read above description (constructor)
+
         uint16_t newMessageIndex; // The index used so the program knows where to insert decoded characters into the userInput array.
+        bool newMessageReady; // Turns true after a message is decoded, and turns false as soon as getLatestMessage is called.
+
         uint16_t timeUnitUpperLimitMs; // Read above description (setTimeUnitUpperLimitMs)
         uint8_t debounceIntervalMs; // Read above description (setDebounceIntervalMs)
         uint16_t finishedTypingMs; // Read above description (setFinishedTypingMs)
-        uint16_t userInputMax; // Read above description (constructor)
-        uint16_t decodedMessageMax; // Read above description (constructor)
 
         // The user input is being stored as an array of telegraph key presses. After the input is finished, THEN everything is parsed and printed.
         // Every EVEN index contains the amount of time the key was held down.
         // Every ODD index contains the amount of time the key was released between digits.
         uint16_t* userInput;
         uint16_t userInputCounter; // The number of times the key was pressed (and released).
+        uint16_t userInputMax; // Read above description (constructor)
 
         unsigned long lastMillis; // The millis counter on the last iteration, used to check user input only once per millisecond
         unsigned long lastUserInputMs; // The last time there was any user activity on the key.
@@ -103,6 +115,8 @@ class MorseCodeDecoder {
 
         uint16_t keyReleaseCounterMs; // How many milliseconds the key was released IN BETWEEN times held.
         uint16_t lowestInputReleaseMs; // THe LOWEST duration that the key was released IN BETWEEN times held.
+
+        bool listening; // Read above description (getListeningStatus)
 
 };
 #endif

@@ -35,7 +35,7 @@ void loop() {
     bool currTelegraphKeyStatus = digitalRead(TELEGRAPH_KEY);
     long currMillis = millis();
 
-    // If the user input is inactive for the amount of time determined by setFinishedTypingMs, then the message will be decoded.
+    // If the user input is inactive for the amount of time determined by finishedTypingMs, then the message will be decoded.
     // As soon as the message is finished being decoded, this method returns true, and we can get the message.
     if(decoder.monitorUserInput(currTelegraphKeyStatus, currMillis)) {
 
@@ -53,4 +53,17 @@ void loop() {
         // Tell the decoder you've read the message so that we don't continuously execute the code in this 'if' block.
         decoder.acknowledgeMessage(); 
     }
+
+    bool listeningStatus = decoder.getListeningStatus();
+
+    // The "listening" field monitors whether the user held the key down for the duration of finishedTypingMs
+    // For a full description of what this field represents, see MorseCodeDecoder.h
+    if(listeningStatus && listeningStatus != lastListeningStatus) {
+        Serial.println("Listening...");
+    }
+    else if (!listeningStatus && listeningStatus != lastListeningStatus) {
+        Serial.println("No longer listening.");
+    }
+
+    lastListeningStatus = listeningStatus;
 }
