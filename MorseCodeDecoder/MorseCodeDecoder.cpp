@@ -205,8 +205,6 @@ void MorseCodeDecoder::decodeMessage() {
             }
 
             // This character is complete, and we may set the next character in the decoded message
-            // We are overwriting the user input array to store the decoded message because it is already allocated,
-            // and we do not need to use the values that have already been decoded.
             this->decodedMessage[this->newMessageIndex] = morseCodeInternational[charBuilder];
             this->newMessageIndex++;
             charBuilderIndex = 6; // One higher than 5 because we decrement the index at the end of the loop
