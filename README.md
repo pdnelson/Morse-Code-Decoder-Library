@@ -56,22 +56,13 @@ to the morse code intervals using the knob, while the operator on the side with 
 called "listening").
 
 Specifically, how the code behind `getListeningStatus` operates is that, after the user holds the button/telegraph key for the duration 
-of time defined by `finishedTypingMs`, then we enter "listening mode." This can be used to signify that you are TOTALLY finished with a message,
-as in the Keyboard Example below.
+of time defined by `finishedTypingMs`, then we enter "listening mode."
 
 Is this a bit confusing? Possibly! Check out the code examples for some more clarity!
 
 ## General Example
 The general example included will run on any microcontroller that you can write C++ for; it showcases all of the functions library 
 contains, and explanations of what they do.
-
-## Keyboard Example
-I used an Arduino Micro with this example, because it is the Arduino board that is most-easily usable as a USB interface device (such as a keyboard).
-
-For this, the Arduino is seen as a USB keyboard by whatever device it is plugged into, and the button/telegraph key can be used to enter
-messages in morse code. These messages are then converted to ASCII characters, and typed on the screen.
-
-To use the enter key, hold the button/telegraph key for the duration defined in `finishedTypingMs`.
 
 ## Morse Code International Alphabet
 This library uses the INTERNATIONAL alphabet, as well as some special characters I threw in there. Check out 
